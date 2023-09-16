@@ -1,0 +1,76 @@
+############################SIZE_T##################################
+
+size_t
+              Include: <stddef.h> or <sys/types.h>.  Alternatively, <aio.h>, <glob.h>, <grp.h>, <iconv.h>,  <monetary.h>,
+              <mqueue.h>,  <ndbm.h>,  <pwd.h>,  <regex.h>,  <search.h>,  <signal.h>,  <stdio.h>,  <stdlib.h>, <string.h>,
+              <strings.h>, <sys/mman.h>, <sys/msg.h>, <sys/sem.h>, <sys/shm.h>,  <sys/socket.h>,  <sys/uio.h>,  <time.h>,
+              <unistd.h>, <wchar.h>, or <wordexp.h>.
+
+              Used for a count of bytes.  It is the result of the sizeof operator.  According to the C language standard,
+              it shall be an unsigned integer type capable of storing values in the range [0,  SIZE_MAX].   According  to
+              POSIX,  the  implementation shall support one or more programming environments where the width of size_t is
+              no greater than the width of the type long.
+
+              The length modifier for size_t for the printf(3) and the scanf(3) families of  functions  is  z;  resulting
+              commonly in %zu or %zx for printing size_t values.
+
+              Versions: <aio.h>, <glob.h>, <grp.h>, <iconv.h>, <mqueue.h>, <pwd.h>, <signal.h>, and <sys/socket.h> define
+              size_t since POSIX.1-2008.
+
+              Conforming to: C99 and later; POSIX.1-2001 and later.
+
+              See also: read(2), write(2), fread(3), fwrite(3), memcmp(3), memcpy(3), memset(3), offsetof(3)
+
+              See also the ptrdiff_t and ssize_t types in this page.
+
+############################SSIZE_T##################################
+       ssize_t
+              Include:  <sys/types.h>.   Alternatively,  <aio.h>,  <monetary.h>,  <mqueue.h>,   <stdio.h>,   <sys/msg.h>,
+              <sys/socket.h>, <sys/uio.h>, or <unistd.h>.
+
+              Used  for  a  count of bytes or an error indication.  According to POSIX, it shall be a signed integer type
+              capable of storing values at least in the range [-1, SSIZE_MAX], and the implementation shall  support  one
+              or more programming environments where the width of ssize_t is no greater than the width of the type long.
+
+              Glibc  and  most  other  implementations  provide  a  length modifier for ssize_t for the printf(3) and the
+              scanf(3) families of functions, which is z; resulting commonly in %zd or %zi for printing  ssize_t  values.
+              Although z works for ssize_t on most implementations, portable POSIX programs should avoid using it—for ex‐
+              ample, by converting the value to intmax_t and using its length modifier (j).
+
+              Conforming to: POSIX.1-2001 and later.
+
+              See also: read(2), readlink(2), readv(2), recv(2), send(2), write(2)
+
+			  NAME
+       close - close a file descriptor
+
+SYNOPSIS
+       #include <unistd.h>
+
+       int close(int fd);
+
+###################################CLOSE########################################
+DESCRIPTION
+       close()  closes  a  file  descriptor, so that it no longer refers to any file and may be reused.  Any record locks
+       (see fcntl(2)) held on the file it was associated with, and owned by the process, are removed (regardless  of  the
+       file descriptor that was used to obtain the lock).
+
+       If  fd  is the last file descriptor referring to the underlying open file description (see open(2)), the resources
+       associated with the open file description are freed; if the file descriptor was the last reference to a file which
+       has been removed using unlink(2), the file is deleted.
+
+RETURN VALUE
+       close() returns zero on success.  On error, -1 is returned, and errno is set appropriately.
+
+ERRORS
+       EBADF  fd isn't a valid open file descriptor.
+
+       EINTR  The close() call was interrupted by a signal; see signal(7).
+
+       EIO    An I/O error occurred.
+
+       ENOSPC, EDQUOT
+              On  NFS, these errors are not normally reported against the first write which exceeds the available storage
+              space, but instead against a subsequent write(2), fsync(2), or close().
+
+       See NOTES for a discussion of why close() should not be retried after an error.
