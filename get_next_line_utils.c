@@ -6,34 +6,28 @@
 /*   By: tkasbari <thomas.kasbarian@gmail.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 10:21:56 by tkasbari          #+#    #+#             */
-/*   Updated: 2023/09/18 14:35:08 by tkasbari         ###   ########.fr       */
+/*   Updated: 2023/09/20 10:27:00 by tkasbari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-//find and return the index of the n-th occurence of c in str
+//find and return the index of c in str. search for a maximum of n chars
 //return -1 if not found
-size_t	ft_strat(const char *str, int c, int n)
+size_t	ft_strnat(const char *str, int c, size_t n)
 {
 	char	*s1;
 	size_t	i;
-	int		occurrence;
 
 	i = 0;
-	occurrence = 0;
 	s1 = (char *) str;
-	while (s1[i])
+	while (s1[i] && i < n)
 	{
 		if(s1[i] == c)
-		{
-			occurrence++;
-			if (occurrence == (int)n)
-				return (i);
-		}
+			return (i);
 		i++;
 	}
-	return (-1);
+	return (NO_NEW_LINE);
 }
 
 void	*ft_calloc(size_t nmemb, size_t size)

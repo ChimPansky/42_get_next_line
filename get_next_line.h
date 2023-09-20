@@ -6,7 +6,7 @@
 /*   By: tkasbari <thomas.kasbarian@gmail.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 10:21:53 by tkasbari          #+#    #+#             */
-/*   Updated: 2023/09/18 16:06:16 by tkasbari         ###   ########.fr       */
+/*   Updated: 2023/09/20 10:13:12 by tkasbari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #  define BUFFER_SIZE 5
 # endif
 
-# define MALLOC_SIZE BUFFER_SIZE * 2
+# define MALLOC_SIZE BUFFER_SIZE
 
 typedef struct s_line
 {
@@ -41,7 +41,7 @@ typedef struct s_buffer
 }				t_buffer;
 
 char	*get_next_line(int fd);
-size_t	ft_strat(const char *str, int c, int occurrence);
+size_t	ft_strnat(const char *str, int c, size_t n);
 void	*ft_calloc(size_t nmemb, size_t size);
 void	*ft_memset(void	*s, int c, size_t n);
 void	*ft_memmove(void	*dest, const void *src, size_t n);
