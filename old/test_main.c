@@ -9,7 +9,7 @@ int	main(int	argc, char **argv)
 	int	input_no;
 	int		i;
 
-	files[0] = "test_inputs/input.txt";
+	files[0] = "test_inputs/fsoares/input.txt";
 	files[1] = "test_inputs/fsoares/empty.txt";
 	files[2] = "test_inputs/fsoares/giant_line.txt";
 	files[3] = "test_inputs/fsoares/giant_line_nl.txt";
@@ -52,18 +52,15 @@ int	main(int	argc, char **argv)
 	printf("File opened: %i\n", fd1);
 	//open file and get file descriptor fd
 	printf("Testinput: %s\n", files[input_no]);
-	next_line = get_next_line(fd1);
-	while (next_line && i < 10)
+	next_line = NULL;
+	while ((next_line = get_next_line(fd1)))
 	{
-
 		//printf("XXXXXXXXXXXXXXXXXXXXX\n");
 		//printf("LINE NO %i: %s", ++i , next_line);
-		//ft_putstr_fd("\nGET_NEXT_LINE: ", 1);
-		ft_putstr_fd(next_line, 1);
+		printf("%s", next_line);
 		i++;
 		free(next_line);
-		next_line = get_next_line(fd1);
-		}
+	}
 	//next_line = get_next_line(fd1);
 	//	printf("LINE NO %i: %s\n", ++i , next_line);
 

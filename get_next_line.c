@@ -1,156 +1,146 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tkasbari <thomas.kasbarian@gmail.com>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/09/18 10:21:48 by tkasbari          #+#    #+#             */
-/*   Updated: 2023/09/20 13:22:22 by tkasbari         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/*
-static void	print_t_line(t_line *gline)
-{
-	printf("line_content: %s\n", gline->content);
-	printf("line_len: %lu\n", gline->len);
-	printf("line_bytes_allocated: %lu\n", gline->bytes_allocated);
-	printf("line_eol_found: %i\n\n", gline->eol_found);
-}
-static void	print_t_buffer(t_buffer *lbuffer)
-{
-	printf("buffer_content: %s\n", lbuffer->content);
-	printf("buffer_len: %lu\n", lbuffer->len);
-	printf("buffer_eol_index: %lu\n", lbuffer->eol_index);
-}
-*/
+static int	check_line_size(t_line *gline, t_buffer *buf);
+static int	grow_line(t_line *gline, t_buffer *buf, int fd);
+static int	read_buf(t_buffer *buf, int fd);
+static char	*print_buf(t_buffer *buf);
+char	*get_next_line(int fd);
 
-/*
-static void	*error_exit(t_line *gline)
-{
-	printf("error_exit(): freeing gline...\n");
-	if (gline->content)
-		free(gline->content);
-	return (NULL);
-}*/
-static void	*error_exit()
-{
-	return (NULL);
-}
 
-static int	read_next_chunk(t_buffer *lbuffer, int fd)
+static int	check_line_size(t_line *gline, t_buffer *buf)
 {
-	ssize_t	bytes_read;
-
-	bytes_read = read(fd, lbuffer->content, BUFFER_SIZE);
-	if (bytes_read == -1)
-	{
-		printf("read_next_chunk.read(): Error Reading\n");
-		error_exit();
+	size_t	addition;
+	int		nbytes;
+	char	*new;
+	if (buf->nl_ind == -1)
+		addition = buf->len;
+	else
+		addition = buf->nl_ind + 1;
+	if (gline->len + addition > gline->allocated - 1)
+		new = ft_calloc(sizeof(char), gline->allocated + BUFFER_SIZE);
+	if (!new)
 		return (-1);
+	ft_memmove(new, gline->content, gline->len);
+	free(gline->content);
+	gline->content = new;
+	return (0);
+}
+
+static int	grow_line(t_line *gline, t_buffer *buf, int fd)
+{
+	int		nbytes;
+
+	if (!gline->content)
+	{
+		gline->len = 0;
+		gline->eol_ind = -1;
+		gline->ready_to_print = 0;
+		gline->content = ft_calloc(sizeof(char), 2 * BUFFER_SIZE);
+		if (!gline->content)
+			return (-1);
+		gline->allocated = 2 * BUFFER_SIZE;
 	}
+	else if (check_line_size(gline, buf) < 0)
+		return (-1);
+	if (buf->nl_ind > -1)
+		nbytes = buf->nl_ind + 1;
+	else
+		nbytes = buf->len;
+	ft_memmove(gline->content + gline->len, buf->content, nbytes);
+	gline->len += nbytes;
+	ft_memmove(buf->content, (buf->content + nbytes), buf->len - nbytes);
+	buf->len -= nbytes;
+	ft_memset(buf->content + buf->len, '\0', nbytes);
+	buf->nl_ind = ft_strnat(buf->content, '\n', buf->len);
+	gline->eol_ind = ft_strnat(gline->content, '\n', gline->len);
+	gline->ready_to_print = 1;
+	if (gline->eol_ind > -1)
+		return (1);
 	else
 	{
-		lbuffer->len = bytes_read;
+		nbytes = read_buf(buf, fd);
+		if (nbytes > 0)
+		{
+			gline->ready_to_print = 0;
+			return (0);
+		}
+		if (nbytes == 0)
+			return (1);
+		if (nbytes = -1)
+		{
+			gline->content = NULL;
+			return -1;
+		}
 	}
-	lbuffer->eol_index = ft_strnat(lbuffer->content, '\n', lbuffer->len);
+}
+
+static int	read_buf(t_buffer *buf, int fd)
+{
+	int	bytes_read;
+
+	bytes_read = 0;
+	if (!buf->len)
+	{
+		bytes_read = read(fd, buf->content, BUFFER_SIZE);
+		buf->len = bytes_read;
+		buf->nl_ind = ft_strnat(buf->content, '\n', buf->len);
+		if (bytes_read < BUFFER_SIZE)
+			buf->ready_to_print = 1;
+		else
+			buf->ready_to_print = 0;
+	}
+	if (buf->nl_ind > -1)
+		buf->ready_to_print = 1;
+	else
+		buf->ready_to_print = 0;
 	return (bytes_read);
 }
 
-static int	grow_line(t_line *gline, t_buffer *lbuffer)
+static char	*print_buf(t_buffer *buf)
 {
-	char	*new_alloc;
-
-	if ((gline->len + BUFFER_SIZE) >= gline->bytes_allocated - 1)
-	{
-		new_alloc = (char *)ft_calloc(sizeof(char), (gline->bytes_allocated + MALLOC_SIZE));
-		if (!new_alloc){
-			free(gline->content);
-			return (0);
-	}
-		ft_memmove(new_alloc, gline->content, gline->len);
-		free(gline->content);
-		gline->content = new_alloc;
-		gline->bytes_allocated += MALLOC_SIZE;
-	}
-	if (lbuffer->eol_index == NO_NEW_LINE)
-	{
-		ft_memmove((void*)(gline->content + gline->len), (void*)lbuffer->content, lbuffer->len);
-		gline->len += lbuffer->len;
-		gline->eol_found = 0;
-		lbuffer->len = 0;
-		ft_memset((void*)lbuffer->content, '\0', BUFFER_SIZE);
-	}
-	else
-	{
-		ft_memmove((void*)(gline->content + gline->len), (void*)lbuffer->content, lbuffer->eol_index + 1);
-		gline->len += lbuffer->eol_index + 1;
-		gline->eol_found = 1;
-		lbuffer->len -= (lbuffer->eol_index + 1);
-		ft_memmove((void*)lbuffer->content, ((void*)lbuffer->content + lbuffer->eol_index + 1), lbuffer->len);
-		ft_memset((void*)(lbuffer->content + lbuffer->len), '\0', BUFFER_SIZE - lbuffer->len);
-		lbuffer->eol_index = ft_strnat(lbuffer->content, '\n', lbuffer->len);
-	}
-	return (1);
-}
-
-static char	*get_nl_buffer(t_buffer *lbuffer)
-{
-	char	*buffer_line;
+	char	*result;
 	size_t	nbytes;
 
-	nbytes = ft_strnat(lbuffer->content, '\n', lbuffer->len) + 1;
-	if (nbytes == 0)
-		nbytes = lbuffer->len;
-	buffer_line = malloc(sizeof(char)*(nbytes + 1));
-	if (!buffer_line)
+	if (buf->nl_ind > -1)
+		nbytes = buf->nl_ind + 1;
+	else
+		nbytes = buf->len;
+	result = ft_calloc(sizeof(char), nbytes +1);
+	if (!result)
 		return (NULL);
-	ft_memmove((void*)buffer_line, (void*)lbuffer->content, nbytes);
-	buffer_line[nbytes] = '\0';
-	ft_memmove((void*)lbuffer->content, (void*)(lbuffer->content + nbytes), lbuffer->len - nbytes);
-	lbuffer->len -= nbytes;
-	lbuffer->eol_index = ft_strnat(lbuffer->content, '\n', lbuffer->len);
-	return (buffer_line);
+	ft_memmove(result, buf->content, nbytes);
+	ft_memmove(buf->content, (buf->content + nbytes), buf->len - nbytes);
+	buf->len -= nbytes;
+	ft_memset(buf->content + buf->len, '\0', nbytes);
+	buf->nl_ind = ft_strnat(buf->content, '\n', buf->len);
+	if (buf->nl_ind > -1)
+		buf->ready_to_print = 1;
+	else
+		buf->ready_to_print = 0;
+	return (result);
 }
+
 char	*get_next_line(int fd)
 {
-	static t_buffer	lbuffer;
-	t_line			growing_line;
-	int				read_result;
+	static t_buffer	buf;
+	t_line			gline;
 
-	if (BUFFER_SIZE <= 0)
+	if (read_buf(&buf, fd) == -1)
 		return (NULL);
-	if (!lbuffer.len)
-		read_next_chunk(&lbuffer, fd);
-	if (!lbuffer.len)
-		return (NULL);
-	read_result = 0;
-	if (lbuffer.eol_index != NO_NEW_LINE)
-		return (get_nl_buffer(&lbuffer));
-	growing_line.content = malloc(sizeof(t_line) * MALLOC_SIZE);
-	if (!growing_line.content)
-		return (NULL);
-	growing_line.len = 0;
-	growing_line.bytes_allocated = MALLOC_SIZE;
-	growing_line.eol_found = 0;
-	while (lbuffer.len && !growing_line.eol_found)
+	if (buf.ready_to_print)
 	{
-		if (!grow_line(&growing_line, &lbuffer))
-			return (error_exit());
-		if (!lbuffer.len)
-		{
-			read_result = read_next_chunk(&lbuffer, fd);
-			if (read_result < 0)
-			{
-				free(growing_line.content);
-				return (error_exit());
-			}
-			if (read_result == 0)
-				return(growing_line.content);
-		}
+		//ft_putstr_fd("ready_to_print!\n", 1);
+		//ft_putstr_fd(buf.content, 1);
+
+		//ft_putnbr_fd(buf.len, 1);
+		//ft_putstr_fd("\n", 1);
+		//ft_putnbr_fd(buf.nl_ind, 1);
+		//ft_putstr_fd("\n", 1);
+		return (print_buf(&buf));
 	}
-	return (growing_line.content);
+	while (!grow_line(&gline, &buf, fd)) ;
+	if (gline.content == NULL)
+		ft_putstr_fd("CONTENT == NULL", 1);
+	return (gline.content);
 }

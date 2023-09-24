@@ -1,23 +1,58 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tkasbari <thomas.kasbarian@gmail.com>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/09/18 10:21:56 by tkasbari          #+#    #+#             */
-/*   Updated: 2023/09/20 10:27:00 by tkasbari         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "get_next_line.h"
 
-//find and return the index of c in str. search for a maximum of n chars
-//return -1 if not found
-size_t	ft_strnat(const char *str, int c, size_t n)
+void	ft_putchar_fd(char c, int fd)
+{
+	write(fd, &c, 1);
+}
+
+void	ft_putnbr_fd(int n, int fd)
+{
+	long	nr;
+
+	nr = (long) n;
+	if (nr < 0)
+	{
+		ft_putchar_fd('-', fd);
+		nr *= -1;
+	}
+	if (nr >= 10)
+	{
+		ft_putnbr_fd(nr / 10, fd);
+		ft_putnbr_fd(nr % 10, fd);
+	}
+	if (nr < 10)
+		ft_putchar_fd('0' + nr, fd);
+}
+
+size_t	ft_strlen(const char	*s)
+{
+	size_t	len;
+
+	len = 0;
+	while (*s++)
+		len++;
+	return (len);
+}
+
+void	ft_putstr_fd(char *s, int fd)
+{
+	if (!s)
+		return ;
+	write(fd, s, ft_strlen(s));
+}
+void	*ft_memset(void	*s, int c, size_t n)
+{
+	while (n--)
+	{
+		*(char *)(s + n) = c;
+	}
+	return (s);
+}
+int	ft_strnat(const char *str, int c, size_t n)
 {
 	char	*s1;
-	size_t	i;
+	int	i;
 
 	i = 0;
 	s1 = (char *) str;
@@ -27,7 +62,7 @@ size_t	ft_strnat(const char *str, int c, size_t n)
 			return (i);
 		i++;
 	}
-	return (NO_NEW_LINE);
+	return (-1);
 }
 
 void	*ft_calloc(size_t nmemb, size_t size)
@@ -51,15 +86,6 @@ void	*ft_calloc(size_t nmemb, size_t size)
 		i++;
 	}
 	return (ptr);
-}
-
-void	*ft_memset(void	*s, int c, size_t n)
-{
-	while (n--)
-	{
-		*(char *)(s + n) = c;
-	}
-	return (s);
 }
 
 void	*ft_memmove(void	*dest, const void *src, size_t n)

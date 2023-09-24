@@ -1,51 +1,45 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tkasbari <thomas.kasbarian@gmail.com>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/09/18 10:21:53 by tkasbari          #+#    #+#             */
-/*   Updated: 2023/09/20 10:13:12 by tkasbari         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-# include <stdio.h>
+# include <stdio.h> // REMOVE THIS!!!
 # include <stdlib.h>
 # include <unistd.h>
 
-# define NO_NEW_LINE (size_t) (-1)
-
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 5
+#  define BUFFER_SIZE 42
 # endif
 
-# define MALLOC_SIZE BUFFER_SIZE
-
-typedef struct s_line
-{
-	char	*content;
-	size_t	len;
-	size_t	bytes_allocated;
-	int		eol_found;
-}				t_line;
-
+// Struct for storing the bytes read with read()
+// End of Line Index: Index of \n Character
+// (or last char if End of File).
 typedef struct s_buffer
 {
 	char	content[BUFFER_SIZE];
 	size_t	len;
-	size_t	eol_index;
+	int		nl_ind;
+	int		ready_to_print;
 }				t_buffer;
 
+// Struct for storing a line, that is greater than BUFFER_SIZE
+typedef struct s_line
+{
+	char	*content;
+	size_t	len;
+	int		eol_ind;
+	size_t	allocated;
+	int		ready_to_print;
+}				t_line;
+
 char	*get_next_line(int fd);
-size_t	ft_strnat(const char *str, int c, size_t n);
-void	*ft_calloc(size_t nmemb, size_t size);
+
+void	ft_putchar_fd(char c, int fd); // REMOVE THIS
+void	ft_putnbr_fd(int n, int fd); // REMOVE THIS
+size_t	ft_strlen(const char	*s); // REMOVE THIS
+void	ft_putstr_fd(char *s, int fd); // REMOVE THIS
+
 void	*ft_memset(void	*s, int c, size_t n);
+int		ft_strnat(const char *str, int c, size_t n);
+void	*ft_calloc(size_t nmemb, size_t size);
 void	*ft_memmove(void	*dest, const void *src, size_t n);
-
-
 
 #endif
