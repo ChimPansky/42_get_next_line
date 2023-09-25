@@ -1,75 +1,25 @@
 #include "get_next_line.h"
-#include <fcntl.h>
 
-int	main(int	argc, char **argv)
+int	main(void)
 {
-	char	*next_line;
-	char	*files[26];
-	int		fd1;
-	int	input_no;
-	int		i;
 
-	files[0] = "test_inputs/input.txt";
-	files[1] = "test_inputs/fsoares/empty.txt";
-	files[2] = "test_inputs/fsoares/giant_line.txt";
-	files[3] = "test_inputs/fsoares/giant_line_nl.txt";
-	files[4] = "test_inputs/fsoares/lines_around_10.txt";
-	files[5] = "test_inputs/fsoares/1char.txt";
-	files[6] = "test_inputs/fsoares/multiple_nl.txt";
-	files[7] = "test_inputs/fsoares/one_line_no_nl.txt";
-	files[8] = "test_inputs/fsoares/read_error.txt";
-	files[9] = "test_inputs/fsoares/variable_nls.txt";
-	files[10] = "test_inputs/gnltester/41_no_nl.txt";
-	files[12] = "test_inputs/gnltester/41_with_nl.txt";
-	files[13] = "test_inputs/gnltester/42_no_nl.txt";
-	files[14] = "test_inputs/gnltester/42_with_nl.txt";
-	files[15] = "test_inputs/gnltester/43_no_nl.txt";
-	files[16] = "test_inputs/gnltester/43_with_nl.txt";
-	files[17] = "test_inputs/gnltester/alternate_line_nl_no_nl.txt";
-	files[18] = "test_inputs/gnltester/alternate_line_nl_with_nl.txt";
-	files[19] = "test_inputs/gnltester/big_line_no_nl.txt";
-	files[20] = "test_inputs/gnltester/big_line_with_nl.txt";
-	files[21] = "test_inputs/gnltester/empty.txt";
-	files[22] = "test_inputs/gnltester/multiple_line_no_nl.txt";
-	files[23] = "test_inputs/gnltester/multiple_line_with_nl.txt";
-	files[24] = "test_inputs/gnltester/multiple_nlx5.txt";
-	files[25] = "test_inputs/gnltester/nl.txt";
+	static char *strs[1024];
+	/*
+	strs[2] = "abc";
 
+	printf("strs[0]: %s\n", strs[0]);
+	printf("strs[2]: %s\n", strs[2]);
+	if (!strs[0])
+		printf("NOT strs[0]");
 
+	*/
 
-	if (argc == 2)
-		input_no = atoi(argv[1]);
-	else
-		input_no = 0;
-
-
-	i = 0;
-	printf("Main start\n");
-	fd1 = 0;
-	fd1 = open(files[input_no], O_RDONLY);
-	//fd1 = open("./input.txt", O_RDONLY);
-	//fd1 = 0;
-	printf("File opened: %i\n", fd1);
-	//open file and get file descriptor fd
-	printf("Testinput: %s\n", files[input_no]);
-	next_line = get_next_line(fd1);
-	while (next_line && i < 10)
-	{
-
-		//printf("XXXXXXXXXXXXXXXXXXXXX\n");
-		//printf("LINE NO %i: %s", ++i , next_line);
-		//ft_putstr_fd("\nGET_NEXT_LINE: ", 1);
-		ft_putstr_fd(next_line, 1);
-		i++;
-		free(next_line);
-		next_line = get_next_line(fd1);
-		}
-	//next_line = get_next_line(fd1);
-	//	printf("LINE NO %i: %s\n", ++i , next_line);
-
-	if (next_line)
-		free(next_line);
-	//printf("Reached End of File");
-
+	strs[0] = malloc(10);
+	*strs[0] = 'a';
+	strs[0]++;
+	*strs[0] = 'a';
+	printf("strs[0]: %s\n", strs[0]);
+	strs[0] -= 2;
+	free(strs[0]+1);
 	return (0);
 }
