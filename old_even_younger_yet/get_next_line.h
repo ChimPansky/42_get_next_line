@@ -10,12 +10,6 @@
 #  define BUFFER_SIZE 42
 # endif
 
-typedef struct	s_buffer
-{
-	char	*content;
-	size_t	len;
-}				t_buffer;
-
 char	*get_next_line(int fd);
 // utils:
 char	*ft_substr(char const *s, unsigned int start, size_t len);

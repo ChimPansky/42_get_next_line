@@ -1,58 +1,165 @@
 
-char	*fill_line(char **buf, int fd)
-{
-	char	*line;
-	char	*buf_start;
-	char	*buf_nl;
-	char	*new;
-	int		done;
+#include "get_next_line.h"
 
-	done = 0;
-	line = ft_calloc(1,1);
-	if (!line)
+static int	gnl_init(int fd, t_buffer *stash, t_buffer *buf);
+static int	fill_buffer(int	fd, t_buffer *buf, ssize_t *sread);
+static int	fill_stash(int fd, t_buffer *buf, ssize_t *sread, t_buffer *stash);
+static char	*move_stash_line(t_buffer *stash, ssize_t nl_ind);
+static int	build_line(t_buffer *stash, t_buffer *line, ssize_t *sread);
+
+void	ft_putstr_fd(char *s, int fd)
+{
+	if (!s)
+		return ;
+	write(fd, s, ft_strlen(s));
+}
+void	ft_putchar_fd(char c, int fd)
+{
+	write(fd, &c, 1);
+}
+void	ft_putnbr_fd(int n, int fd)
+{
+	long	nr;
+
+	nr = (long) n;
+	if (nr < 0)
+	{
+		ft_putchar_fd('-', fd);
+		nr *= -1;
+	}
+	if (nr >= 10)
+	{
+		ft_putnbr_fd(nr / 10, fd);
+		ft_putnbr_fd(nr % 10, fd);
+	}
+	if (nr < 10)
+		ft_putchar_fd('0' + nr, fd);
+}
+
+
+///////////////////////////////////////////////////////////777
+static int	gnl_init(int fd, t_buffer *stash, t_buffer *buf)
+{
+	char	tmp[0];
+	if (fd < 0 || BUFFER_SIZE <= 0 || stash->len == (size_t)-1)
+		return (0);
+	if (read(fd, tmp, 0) < 0)
+		return (0);
+	buf->content = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buf->content)
+		return (0);
+	buf->content[0] = '\0';
+	buf->len = 0;
+	if (!stash->content)
+	{
+		stash->content = malloc(sizeof(char) * 1);
+		if (!stash->content)
+		{
+			free(buf->content);
+			return (0);
+		}
+		stash->content[0] = '\0';
+		stash->len = 0;
+	}
+	return (1);
+}
+
+char	*get_next_line(int fd)
+{
+	static t_buffer	stash;
+	t_buffer		line;
+	t_buffer		buf;
+	ssize_t			sread;
+	int				done;
+
+	if (!gnl_init(fd, &stash, &buf))
 		return (NULL);
-	buf_start = buf[fd];
+	line.content = NULL;
+	done = 0;
+	sread = -2;
 	while (!done)
 	{
-		buf_nl = ft_strchr(buf[fd], '\n');
-		if (buf_nl)
-		{
-			done = 1;
-			new = ft_strjoin(line, ft_substr(buf[fd], 0, buf_nl - buf[fd] + 1));
-			if (!new)
-				return (NULL);
-			free(line);
-			line = new;
-			buf[fd] = buf_nl + 1;
-		}
-		ELSE
-			READ INTO BUFFER...
+		if (!fill_stash(fd, &buf, &sread, &stash) || sread == -1)
+			return (NULL);
+		done = build_line(&stash, &line, &sread);
+	}
+	if (line.content == NULL)
+	{
+		free(stash.content);
+		stash.len = (size_t)-1;
+	}
+	if (buf.content)
+		free(buf.content);
+	return (line.content);
+}
+static int	fill_buffer(int	fd, t_buffer *buf, ssize_t *sread)
+{
+	if (buf->content[0] == '\0')
+	{
+		*sread = read(fd, buf->content, BUFFER_SIZE);
+		if (*sread == -1)
+			return (0);
+		buf->content[*sread] = '\0';
+	}
+	return (1);
+}
+static int	fill_stash(int fd, t_buffer *buf, ssize_t *sread, t_buffer *stash)
+{
+	char	*old_stash;
 
+	if (ft_strnat(stash->content, '\n', stash->len) != -1)
+		return (1);
+	if (!fill_buffer(fd, buf, sread))
+	{
+		free(stash->content);
+		return (0);
+	}
+	if (buf->content[0] != '\0')
+	{
+		old_stash = stash->content;
+		stash->content = ft_strjoin(stash->content, buf->content);
+		stash->len = ft_strlen(stash->content);
+		free(old_stash);
+	}
+	if (!stash->content)
+	{
+		free(buf->content);
+		return (0);
+	}
+	buf->content[0] = '\0';
+	return (1);
+}
+static char	*move_stash_line(t_buffer *stash, ssize_t nl_ind)
+{
+	char	*line;
+
+	if (nl_ind < 0 || (nl_ind + 1) == (ssize_t)stash->len)
+	{
+		line = ft_substr(stash->content, 0, stash->len);
+		stash->content[0] = '\0';
+		stash->len = 0;
+	}
+	else
+	{
+		line = ft_substr(stash->content, 0, nl_ind + 1);
+		ft_strlcpy(stash->content, stash->content + nl_ind + 1, stash->len - nl_ind);
+		stash->len = ft_strlen(stash->content);
 	}
 	return (line);
 }
-
-char	*get_next_line(int fd);
+static int	build_line(t_buffer *stash, t_buffer *line, ssize_t *sread)
 {
-	static char *buf[1024];
-	char	*line;
-	ssize_t	bytes_read;
+	ssize_t	nl_ind;
 
-	if (fd < 0 || BUFFER_SIZE < 1)
-		return (null);
-	line = "";
-	if (!buf[fd])
-		buf[fd] = line;
-	if (buf[fd] != "")
+	if (!stash->content)
+		return (0);
+	if (!stash->len && *sread == 0)
+		return (1);
+	nl_ind = ft_strnat(stash->content, '\n', stash->len);
+	if (nl_ind >= 0 || *sread == 0)
 	{
-		bytes_read = read(fd, buf[fd], BUFFER_SIZE);
-		buf[fd][bytes_read] = '\0';
+		line->content = move_stash_line(stash, nl_ind);
+		return (1);
 	}
-	if (bytes_read < 0)
-		return (NULL);
-	if (bytes_read == 0)
-		return (line);
-	line = fill_line(buff, fd);
-
-	return (line);
+	return (0);
 }

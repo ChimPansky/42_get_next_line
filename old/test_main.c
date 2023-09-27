@@ -9,31 +9,31 @@ int	main(int	argc, char **argv)
 	int	input_no;
 	int		i;
 
-	files[0] = "test_inputs/fsoares/input.txt";
-	files[1] = "test_inputs/fsoares/empty.txt";
-	files[2] = "test_inputs/fsoares/giant_line.txt";
-	files[3] = "test_inputs/fsoares/giant_line_nl.txt";
-	files[4] = "test_inputs/fsoares/lines_around_10.txt";
-	files[5] = "test_inputs/fsoares/1char.txt";
-	files[6] = "test_inputs/fsoares/multiple_nl.txt";
-	files[7] = "test_inputs/fsoares/one_line_no_nl.txt";
-	files[8] = "test_inputs/fsoares/read_error.txt";
-	files[9] = "test_inputs/fsoares/variable_nls.txt";
-	files[10] = "test_inputs/gnltester/41_no_nl.txt";
-	files[12] = "test_inputs/gnltester/41_with_nl.txt";
-	files[13] = "test_inputs/gnltester/42_no_nl.txt";
-	files[14] = "test_inputs/gnltester/42_with_nl.txt";
-	files[15] = "test_inputs/gnltester/43_no_nl.txt";
-	files[16] = "test_inputs/gnltester/43_with_nl.txt";
-	files[17] = "test_inputs/gnltester/alternate_line_nl_no_nl.txt";
-	files[18] = "test_inputs/gnltester/alternate_line_nl_with_nl.txt";
-	files[19] = "test_inputs/gnltester/big_line_no_nl.txt";
-	files[20] = "test_inputs/gnltester/big_line_with_nl.txt";
-	files[21] = "test_inputs/gnltester/empty.txt";
-	files[22] = "test_inputs/gnltester/multiple_line_no_nl.txt";
-	files[23] = "test_inputs/gnltester/multiple_line_with_nl.txt";
-	files[24] = "test_inputs/gnltester/multiple_nlx5.txt";
-	files[25] = "test_inputs/gnltester/nl.txt";
+	files[0] = "../test_inputs/fsoares/input.txt";
+	files[1] = "../test_inputs/fsoares/empty.txt";
+	files[2] = "../test_inputs/fsoares/giant_line.txt";
+	files[3] = "../test_inputs/fsoares/giant_line_nl.txt";
+	files[4] = "../test_inputs/fsoares/lines_around_10.txt";
+	files[5] = "../test_inputs/fsoares/1char.txt";
+	files[6] = "../test_inputs/fsoares/multiple_nl.txt";
+	files[7] = "../test_inputs/fsoares/one_line_no_nl.txt";
+	files[8] = "../test_inputs/fsoares/read_error.txt";
+	files[9] = "../test_inputs/fsoares/variable_nls.txt";
+	files[10] = "../test_inputs/gnltester/41_no_nl";
+	files[11] = "../test_inputs/gnltester/41_with_nl";
+	files[12] = "../test_inputs/gnltester/42_no_nl";
+	files[13] = "../test_inputs/gnltester/42_with_nl";
+	files[14] = "../test_inputs/gnltester/43_no_nl";
+	files[15] = "../test_inputs/gnltester/43_with_nl";
+	files[16] = "../test_inputs/gnltester/alternate_line_nl_no_nl";
+	files[17] = "../test_inputs/gnltester/alternate_line_nl_with_nl";
+	files[18] = "../test_inputs/gnltester/big_line_no_nl";
+	files[19] = "../test_inputs/gnltester/big_line_with_nl";
+	files[20] = "../test_inputs/gnltester/empty";
+	files[21] = "../test_inputs/gnltester/multiple_line_no_nl";
+	files[22] = "../test_inputs/gnltester/multiple_line_with_nl";
+	files[23] = "../test_inputs/gnltester/multiple_nlx5";
+	files[24] = "../test_inputs/gnltester/nl";
 
 
 
@@ -44,7 +44,7 @@ int	main(int	argc, char **argv)
 
 
 	i = 0;
-	printf("Main start\n");
+	//printf("Main start\n");
 	fd1 = 0;
 	fd1 = open(files[input_no], O_RDONLY);
 	//fd1 = open("./input.txt", O_RDONLY);
@@ -56,7 +56,7 @@ int	main(int	argc, char **argv)
 	while ((next_line = get_next_line(fd1)))
 	{
 		//printf("XXXXXXXXXXXXXXXXXXXXX\n");
-		//printf("LINE NO %i: %s", ++i , next_line);
+		printf("LINE NO: %i\n", ++i);
 		printf("%s", next_line);
 		i++;
 		free(next_line);

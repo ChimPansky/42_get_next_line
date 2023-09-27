@@ -1,3 +1,18 @@
+# Chimpansky files
+.vscode
+*.Xc
+*.pdf
+*.ods
+*.out
+*.o
+*.ods#
+*.txt
+*.png
+*.so
+*.a
+test_main.c
+gnlTester/
+
 # Prerequisites
 *.d
 
