@@ -7,6 +7,7 @@ static int	fill_stash(int fd, t_buffer *buf, ssize_t *sread, t_buffer *stash);
 static char	*move_stash_line(t_buffer *stash, ssize_t nl_ind);
 static int	build_line(t_buffer *stash, t_buffer *line, ssize_t *sread);
 
+
 void	ft_putstr_fd(char *s, int fd)
 {
 	if (!s)
@@ -41,13 +42,20 @@ void	ft_putnbr_fd(int n, int fd)
 static int	gnl_init(int fd, t_buffer *stash, t_buffer *buf)
 {
 	char	tmp[0];
-	if (fd < 0 || BUFFER_SIZE <= 0 || stash->len == (size_t)-1)
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (0);
 	if (read(fd, tmp, 0) < 0)
+	{
+		free_and_null((void**)stash->content);
 		return (0);
+	}
 	buf->content = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buf->content)
+	{
+		free_and_null((void**)stash->content);
 		return (0);
+	}
 	buf->content[0] = '\0';
 	buf->len = 0;
 	if (!stash->content)
@@ -55,7 +63,7 @@ static int	gnl_init(int fd, t_buffer *stash, t_buffer *buf)
 		stash->content = malloc(sizeof(char) * 1);
 		if (!stash->content)
 		{
-			free(buf->content);
+			free_and_null((void**)buf->content);
 			return (0);
 		}
 		stash->content[0] = '\0';
@@ -84,12 +92,8 @@ char	*get_next_line(int fd)
 		done = build_line(&stash, &line, &sread);
 	}
 	if (line.content == NULL)
-	{
-		free(stash.content);
-		stash.len = (size_t)-1;
-	}
-	if (buf.content)
-		free(buf.content);
+		free_and_null((void**)&stash.content);
+	free(buf.content);
 	return (line.content);
 }
 static int	fill_buffer(int	fd, t_buffer *buf, ssize_t *sread)
@@ -111,7 +115,7 @@ static int	fill_stash(int fd, t_buffer *buf, ssize_t *sread, t_buffer *stash)
 		return (1);
 	if (!fill_buffer(fd, buf, sread))
 	{
-		free(stash->content);
+		free_and_null((void**)stash->content);
 		return (0);
 	}
 	if (buf->content[0] != '\0')
@@ -123,7 +127,7 @@ static int	fill_stash(int fd, t_buffer *buf, ssize_t *sread, t_buffer *stash)
 	}
 	if (!stash->content)
 	{
-		free(buf->content);
+		free_and_null((void**)buf->content);
 		return (0);
 	}
 	buf->content[0] = '\0';

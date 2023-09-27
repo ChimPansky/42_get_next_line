@@ -1,5 +1,14 @@
 #include "get_next_line.h"
 
+void	free_and_null(void **ptr)
+{
+	if (ptr && *ptr)
+	{
+		free(*ptr);
+		*ptr = NULL;
+	}
+}
+
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	char	*result;

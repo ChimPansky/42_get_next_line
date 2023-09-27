@@ -1,7 +1,27 @@
 #include "get_next_line.h"
 
+void	free_and_null(void **ptr)
+{
+	if (ptr && *ptr)
+	{
+		free(*ptr);
+		*ptr = NULL;
+	}
+}
+
+void free_tester(char **str)
+{
+	free_and_null((void**)str);
+}
+
 int	main(void)
 {
+	char	*str = malloc(1);
+	//free_and_null((void**)&str);
+	free_tester(&str);
+	if (!str)
+		printf("!str!!!!\n\n\n");
+
 	static char	*test;
 	static char *strs[1024];
 	char	*test2;
