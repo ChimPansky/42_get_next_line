@@ -1,9 +1,11 @@
 #include "get_next_line.h"
-
+#include <fcntl.h>
+#include <stdio.h>
 int	main(int	argc, char **argv)
 {
-	char	*next_line;
+	//char	*next_line;
 	char	*files[26];
+	char	*bonus_files[3];
 	int		fd1;
 	int	input_no;
 	int		i;
@@ -35,25 +37,62 @@ int	main(int	argc, char **argv)
 	files[24] = "test_inputs/gnltester/nl";
 	files[25] = "invalid_fd";
 
+	bonus_files[0] = "test_inputs/input1.txt";
+	bonus_files[1] = "test_inputs/input2.txt";
+	bonus_files[2] = "test_inputs/input3.txt";
+
 	if (argc == 2)
 		input_no = atoi(argv[1]);
 	else
 		input_no = 0;
 
 	i = 0;
-	fd1 = 0;
-	fd1 = open(files[input_no], O_RDONLY);
 
-	printf("File opened: %i\n", fd1);
-	printf("Testinput: %s\n", files[input_no]);
+	 //Test Mandatory:
+	char *next_line;
+
+	fd1 = open(files[input_no], O_RDONLY);
 	next_line = get_next_line(fd1);
-	next_line = get_next_line(fd1);
-	while (next_line && i < 150)
+	while (next_line && i < 10)
 	{
 		printf("LINE NO %i: ", ++i);
 		printf("%s", next_line);
 		free(next_line);
 		next_line = get_next_line(fd1);
 	}
+
+	close(fd1);
+	//
+
+/*
+	//Test Bonus:
+	int		fd2;
+	int		fd3;
+
+	fd1 = open(bonus_files[0], O_RDONLY);
+	fd2 = open(bonus_files[1], O_RDONLY);
+	fd3 = open(bonus_files[2], O_RDONLY);
+	char *line;
+	line =  get_next_line(fd1);
+	printf("%s", line);
+	free(line);
+	line =  get_next_line(fd2);
+	printf("%s", line);
+	free(line);
+	line =  get_next_line(fd3);
+	printf("%s", line);
+	free(line);
+	line =  get_next_line(27);
+	printf("%s", line);
+	free(line);
+	line =  get_next_line(fd2);
+	printf("%s", line);
+	free(line);
+
+	close(fd1);
+	close(fd2);
+	close(fd3);
+*/
+
 	return (0);
 }

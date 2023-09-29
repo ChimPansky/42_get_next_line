@@ -1,52 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tkasbari <thomas.kasbarian@gmail.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/28 13:05:59 by tkasbari          #+#    #+#             */
-/*   Updated: 2023/09/28 20:09:11 by tkasbari         ###   ########.fr       */
+/*   Updated: 2023/09/28 22:40:13 by tkasbari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
-char		*get_next_line(int fd);
-int			gnl_init(int fd, t_buffer *buf, t_buffer *line, int *err);
-static int	create_line(int fd, t_buffer *buf, t_buffer *line, int *err);
-static int	check_and_fill_buf(int fd, t_buffer *buf, int *err);
-static void	move_buf_line(t_buffer *buf, t_buffer *line, int nbytes, int *err);
-
-char	*get_next_line(int fd)
-{
-	static t_buffer	buf;
-	t_buffer		line;
-	int				err;
-
-	if (!gnl_init(fd, &buf, &line, &err))
-		return (NULL);
-	while (!create_line(fd, &buf, &line, &err))
-		;
-	if (err)
-		free_and_null((void **)&line.cont);
-	if (!line.cont || err || (!buf.len && !buf.last_read))
-	{
-		free_and_null((void **)&buf.cont);
-		buf.len = 0;
-	}
-	return (line.cont);
-}
-
-int	gnl_init(int fd, t_buffer *buf, t_buffer *line, int *err)
+static int	gnl_init(int fd, t_buffer *buf, t_buffer *line, int *err)
 {
 	line->cont = NULL;
 	line->len = 0;
 	*err = 0;
 	if (fd < 0 || BUFFER_SIZE <= 0)
-	{
 		return (0);
-	}
 	if (!buf->cont)
 	{
 		buf->cont = malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -62,27 +34,6 @@ int	gnl_init(int fd, t_buffer *buf, t_buffer *line, int *err)
 		return (0);
 	}
 	return (1);
-}
-
-static int	create_line(int fd, t_buffer *buf, t_buffer *line, int *err)
-{
-	int		nbytes;
-	char	last;
-
-	nbytes = check_and_fill_buf(fd, buf, err);
-	if (*err)
-		return (1);
-	if (nbytes < 0)
-		nbytes = buf->len;
-	if (!buf->len && !buf->last_read)
-		return (1);
-	move_buf_line(buf, line, nbytes, err);
-	if (*err)
-		return (1);
-	last = line->cont[line->len - 1];
-	if (last == '\n')
-		return (1);
-	return (0);
 }
 
 static int	check_and_fill_buf(int fd, t_buffer *buf, int *err)
@@ -131,4 +82,45 @@ static void	move_buf_line(t_buffer *buf, t_buffer *line, int nbytes, int *err)
 		ft_memmove(buf->cont, buf->cont + nbytes, buf->len - nbytes);
 		buf->len -= nbytes;
 	}
+}
+
+static int	create_line(int fd, t_buffer *buf, t_buffer *line, int *err)
+{
+	int		nbytes;
+	char	last;
+
+	nbytes = check_and_fill_buf(fd, buf, err);
+	if (*err)
+		return (1);
+	if (nbytes < 0)
+		nbytes = buf->len;
+	if (!buf->len && !buf->last_read)
+		return (1);
+	move_buf_line(buf, line, nbytes, err);
+	if (*err)
+		return (1);
+	last = line->cont[line->len - 1];
+	if (last == '\n')
+		return (1);
+	return (0);
+}
+
+char	*get_next_line(int fd)
+{
+	static t_buffer	buf[MAX_FDS];
+	t_buffer		line;
+	int				err;
+
+	if (!gnl_init(fd, &buf[fd], &line, &err))
+		return (NULL);
+	while (!create_line(fd, &buf[fd], &line, &err))
+		;
+	if (err)
+		free_and_null((void **)&line.cont);
+	if (!line.cont || err || (!buf[fd].len && !buf[fd].last_read))
+	{
+		free_and_null((void **)&buf[fd].cont);
+		buf[fd].len = 0;
+	}
+	return (line.cont);
 }
